@@ -2,7 +2,7 @@ import json
 import os
 import random
 from hashlib import md5
-
+import time
 import requests
 from requests.adapters import HTTPAdapter
 
@@ -132,11 +132,17 @@ if __name__ == '__main__':
     users = parseUserInfo()
 
     for user in users:
-        try:
-            prepareSign(user)
-        except Exception as e:
-            print('职校家园打卡失败，错误原因：' + str(e))
-            MessagePush.pushMessage('职校家园打卡失败',
-                                    '职校家园打卡失败,' +
-                                    '具体错误信息：' + str(e)
-                                    , user["pushKey"])
+        time.sleep(1)
+        print('已加载用户 ' + user['alias'])
+        headers = {
+            'Auth': '1111',
+            "content-type": "application/json;charset=UTF-8"
+        }
+        resp = requests.post('http://dk.sxba.api.xuanran.cc/', headers=headers,
+                             data=json.dumps(user).encode('utf-8'))
+
+        res = resp.json()
+        if res['code'] == 20000:
+            print(user['alias'] + ' 打卡成功！')
+            continue
+        print(user['alias'] + ' 打卡失败！错误原因：' + res['message'])
